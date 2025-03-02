@@ -12,13 +12,33 @@ body {
     align-items: center;
     min-height: 100vh;
     color: #333;
+    background-image: radial-gradient(circle, #3a3a3a 0%, #202020 100%);
 }
 
 .gameboy {
     background-color: #c5cfa3; /* Game Boy light green color */
     width: 420px;
     padding: 20px;
-    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
+    box-shadow: 
+        0 10px 20px rgba(0, 0, 0, 0.4),
+        inset 2px 2px 6px rgba(255, 255, 255, 0.3),
+        inset -2px -2px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 10px 10px 60px 10px;
+    position: relative;
+    transform: perspective(800px) rotateX(5deg);
+}
+
+/* Create a subtle texture overlay for the plastic look */
+.gameboy::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('data:image/png;base64,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');
+    opacity: 0.05;
+    pointer-events: none;
     border-radius: 10px 10px 60px 10px;
 }
 
@@ -47,6 +67,7 @@ body {
     padding: 20px;
     margin-bottom: 30px;
     position: relative;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.4);
 }
 
 .power-indicator {
@@ -66,6 +87,13 @@ body {
     height: 6px;
     background-color: #ff0000;
     border-radius: 50%;
+    box-shadow: 0 0 5px #ff0000;
+    animation: blink 4s infinite;
+}
+
+@keyframes blink {
+    0%, 80%, 100% { opacity: 1; }
+    85% { opacity: 0.3; }
 }
 
 .screen {
@@ -78,8 +106,7 @@ body {
 }
 
 /* Screen scan lines effect */
-.screen::before {
-    content: '';
+.screen-overlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -91,6 +118,25 @@ body {
         transparent 4px
     );
     z-index: 2;
+    pointer-events: none;
+}
+
+/* Screen reflection effect */
+.screen::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.07) 0%,
+        transparent 5%,
+        transparent 95%,
+        rgba(0, 0, 0, 0.1) 100%
+    );
+    z-index: 3;
     pointer-events: none;
 }
 
@@ -136,12 +182,17 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.2);
 }
 
 .dpad-up, .dpad-right, .dpad-down, .dpad-left {
     position: absolute;
     background-color: #333;
     cursor: pointer;
+    box-shadow: 
+        0 3px 5px rgba(0, 0, 0, 0.2),
+        inset 0 1px 2px rgba(255, 255, 255, 0.2);
+    transition: transform 0.1s, box-shadow 0.1s;
 }
 
 .dpad-up {
@@ -176,6 +227,14 @@ body {
     border-radius: 5px 0 0 5px;
 }
 
+/* Pressed state for D-pad */
+.dpad-up:active, .dpad-right:active, .dpad-down:active, .dpad-left:active {
+    transform: scale(0.95);
+    box-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.2),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+}
+
 /* Action buttons styling */
 .action-buttons {
     position: absolute;
@@ -196,10 +255,23 @@ body {
     color: white;
     font-size: 20px;
     cursor: pointer;
+    box-shadow: 
+        0 4px 6px rgba(0, 0, 0, 0.2),
+        inset 0 1px 3px rgba(255, 255, 255, 0.2);
+    transition: transform 0.1s, box-shadow 0.1s;
 }
 
 .btn-a span, .btn-b span {
     transform: translateY(-2px);
+    user-select: none;
+}
+
+/* Pressed state for action buttons */
+.btn-a:active, .btn-b:active {
+    transform: scale(0.95) translateY(2px);
+    box-shadow: 
+        0 2px 3px rgba(0, 0, 0, 0.2),
+        inset 0 1px 2px rgba(255, 255, 255, 0.1);
 }
 
 /* Start/Select buttons styling */
@@ -221,11 +293,131 @@ body {
     cursor: pointer;
     text-align: center;
     transform: rotate(-25deg);
+    box-shadow: 
+        0 3px 5px rgba(0, 0, 0, 0.2),
+        inset 0 1px 2px rgba(255, 255, 255, 0.2);
+    transition: transform 0.1s, box-shadow 0.1s;
 }
 
-/* Active state for buttons */
-.dpad-up:active, .dpad-right:active, .dpad-down:active, .dpad-left:active,
-.btn-a:active, .btn-b:active, .btn-select:active, .btn-start:active {
+/* Pressed state for menu buttons */
+.btn-select:active, .btn-start:active {
+    transform: rotate(-25deg) scale(0.95) translateY(2px);
+    box-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.2),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Volume slider */
+.volume-slider {
+    position: absolute;
+    top: 30px;
+    right: -10px;
+    width: 10px;
+    height: 60px;
+}
+
+.volume-track {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 10px;
+    height: 60px;
+    background-color: #666;
+    border-radius: 5px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.volume-knob {
+    position: absolute;
+    top: 25px;
+    left: -5px;
+    width: 20px;
+    height: 10px;
+    background-color: #333;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+}
+
+/* Battery indicator */
+.battery-indicator {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 8px;
+    color: #666;
+}
+
+/* HUD elements and game status indicators */
+.status-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 10px;
+    color: #0f380f;
+    z-index: 10;
+}
+
+.ability-icons {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+}
+
+.ability-icon {
+    width: 16px;
+    height: 16px;
+    background-color: #306230;
+    border: 1px solid #0f380f;
+}
+
+/* Animation for snake movement */
+@keyframes snakeMove {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(1px); }
+    50% { transform: translateX(0); }
+    75% { transform: translateX(-1px); }
+    100% { transform: translateX(0); }
+}
+
+/* Animation for power-up effect */
+@keyframes powerUpPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+/* Game Boy powered-on state */
+.gameboy.powered-on .led {
+    background-color: #4CAF50;
+    box-shadow: 0 0 10px #4CAF50;
+}
+
+/* Battery low indication */
+.gameboy.battery-low .led {
+    animation: batteryLow 1s infinite;
+}
+
+@keyframes batteryLow {
+    0%, 50% { background-color: #ff0000; box-shadow: 0 0 5px #ff0000; }
+    51%, 100% { background-color: #990000; box-shadow: 0 0 0px #990000; }
+}
+
+/* Active button state class */
+.active-button {
+    transform: scale(0.95) translateY(2px) !important;
+    box-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.2),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
     opacity: 0.8;
-    transform: scale(0.95);
+}
+
+.dpad .active-button {
+    transform: scale(0.95) !important;
+}
+
+.menu-buttons .active-button {
+    transform: rotate(-25deg) scale(0.95) translateY(2px) !important;
 }

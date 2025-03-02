@@ -2,163 +2,97 @@
  * Audio Manager for Game Boy style sound effects
  */
 const AudioManager = {
-    // Sound references
-    sounds: {
-        move: null,
-        eat: null,
-        gameOver: null,
-        start: null
-    },
-
+    // Audio context
+    audioContext: null,
+    
     // Volume level (0.0 to 1.0)
     volume: 0.5,
     
     // Mute state
     muted: false,
-
+    
+    // Flag to track initialization
+    initialized: false,
+    
     /**
      * Initialize the audio manager
      */
     init() {
-        // Load sound elements
-        this.sounds.move = document.getElementById('move-sound');
-        this.sounds.eat = document.getElementById('eat-sound');
-        this.sounds.gameOver = document.getElementById('gameover-sound');
-        this.sounds.start = document.getElementById('start-sound');
-
-        // Create Game Boy sounds programmatically
-        this.createGameBoySounds();
-        
-        // Set up volume slider
+        // Defer audio initialization until first user interaction
         this.setupVolumeControl();
-    },
-
-    /**
-     * Create Game Boy style sound effects using Web Audio API
-     */
-    createGameBoySounds() {
-        // We'll use AudioContext to create 8-bit style sounds
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContext) {
-            console.warn('Web Audio API not supported in this browser');
-            return;
-        }
-
-        this.audioContext = new AudioContext();
-        
-        // Create sound buffers
-        this.createMoveSound();
-        this.createEatSound();
-        this.createGameOverSound();
-        this.createStartSound();
     },
     
     /**
-     * Create a simple square wave oscillator sound
-     * @param {number} frequency - Oscillator frequency
+     * Initialize audio context after user interaction
+     */
+    initAudioContext() {
+        if (this.initialized) return;
+        
+        try {
+            // Using AudioContext to create 8-bit style sounds
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext) {
+                this.audioContext = new AudioContext();
+                
+                // Resume context if suspended
+                if (this.audioContext.state === 'suspended') {
+                    this.audioContext.resume();
+                }
+                
+                this.initialized = true;
+            }
+        } catch (e) {
+            console.warn('Web Audio API not supported in this browser');
+            this.muted = true;
+        }
+    },
+    
+    /**
+     * Create a simple square wave oscillator sound (8-bit style)
+     * @param {number} frequency - Sound frequency in Hz
      * @param {number} duration - Sound duration in seconds
-     * @param {string} type - Oscillator type (square, sine, etc.)
+     * @returns {Object|null} - Sound object that can be played
      */
-    createTone(frequency, duration, type = 'square') {
-        if (!this.audioContext) return null;
+    createTone(frequency, duration) {
+        if (!this.initialized || this.muted || !this.audioContext) return null;
         
-        const oscillator = this.audioContext.createOscillator();
-        const gainNode = this.audioContext.createGain();
-        
-        oscillator.type = type;
-        oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
-        
-        // Apply envelope for Game Boy sound
-        gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
-        gainNode.gain.linearRampToValueAtTime(this.volume, this.audioContext.currentTime + 0.01);
-        gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + duration);
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(this.audioContext.destination);
-        
-        return {
-            oscillator,
-            gainNode,
-            start() {
-                oscillator.start();
-                oscillator.stop(this.audioContext.currentTime + duration);
-            }
-        };
-    },
-
-    /**
-     * Create the "move" sound
-     */
-    createMoveSound() {
-        // Simple blip sound
-        this.moveSound = () => {
-            if (this.muted) return;
-            const tone = this.createTone(150, 0.05);
-            if (tone) tone.start();
-        };
-    },
-
-    /**
-     * Create the "eat" sound
-     */
-    createEatSound() {
-        // Two-note sound when eating food
-        this.eatSound = () => {
-            if (this.muted) return;
-            const tone1 = this.createTone(300, 0.1);
-            const tone2 = this.createTone(450, 0.1);
+        try {
+            const oscillator = this.audioContext.createOscillator();
+            const gainNode = this.audioContext.createGain();
             
-            if (tone1 && tone2) {
-                tone1.start();
-                setTimeout(() => tone2.start(), 100);
-            }
-        };
-    },
-
-    /**
-     * Create the "game over" sound
-     */
-    createGameOverSound() {
-        // Descending notes for game over
-        this.gameOverSound = () => {
-            if (this.muted) return;
+            // Typical Game Boy sound (square wave)
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
             
-            // Play a series of descending notes
-            const startFreq = 400;
-            for (let i = 0; i < 5; i++) {
-                const tone = this.createTone(startFreq - (i * 50), 0.2);
-                if (tone) {
-                    setTimeout(() => tone.start(), i * 180);
+            // Create volume envelope
+            gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(this.volume, this.audioContext.currentTime + 0.01);
+            gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + duration);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(this.audioContext.destination);
+            
+            return {
+                play() {
+                    try {
+                        oscillator.start();
+                        oscillator.stop(audioContext.currentTime + duration);
+                    } catch (e) {
+                        console.warn('Error playing sound:', e);
+                    }
                 }
-            }
-        };
-    },
-
-    /**
-     * Create the "start" sound
-     */
-    createStartSound() {
-        // Ascending notes for start
-        this.startSound = () => {
-            if (this.muted) return;
-            
-            // Play classic Game Boy startup-like sound
-            const freqs = [300, 400, 500, 600];
-            
-            for (let i = 0; i < freqs.length; i++) {
-                const tone = this.createTone(freqs[i], 0.15);
-                if (tone) {
-                    setTimeout(() => tone.start(), i * 100);
-                }
-            }
-        };
+            };
+        } catch (e) {
+            console.warn('Error creating tone:', e);
+            return null;
+        }
     },
     
     /**
      * Set up volume control using the volume slider
      */
     setupVolumeControl() {
-        const volumeKnob = document.querySelector('.volume-knob');
+        const volumeKnob = document.getElementById('volume-knob');
         const volumeTrack = document.querySelector('.volume-track');
         
         if (volumeKnob && volumeTrack) {
@@ -167,7 +101,20 @@ const AudioManager = {
             let startY;
             let startTop;
             
+            const updateVolumeFromPosition = (newTop) => {
+                const trackHeight = volumeTrack.clientHeight - volumeKnob.clientHeight;
+                const boundedTop = Math.max(0, Math.min(trackHeight, newTop));
+                volumeKnob.style.top = boundedTop + 'px';
+                
+                // Calculate volume (0 at bottom, 1 at top)
+                const volume = 1 - (boundedTop / trackHeight);
+                this.setVolume(volume);
+            };
+            
             volumeKnob.addEventListener('mousedown', (e) => {
+                // Initialize audio on first interaction
+                this.initAudioContext();
+                
                 isDragging = true;
                 startY = e.clientY;
                 startTop = parseInt(window.getComputedStyle(volumeKnob).top);
@@ -178,46 +125,26 @@ const AudioManager = {
                 if (!isDragging) return;
                 
                 const deltaY = e.clientY - startY;
-                const trackHeight = volumeTrack.clientHeight - volumeKnob.clientHeight;
-                let newTop = Math.max(0, Math.min(trackHeight, startTop + deltaY));
-                
-                volumeKnob.style.top = newTop + 'px';
-                
-                // Calculate volume based on knob position
-                const volume = 1 - (newTop / trackHeight);
-                this.setVolume(volume);
+                updateVolumeFromPosition(startTop + deltaY);
             });
             
             document.addEventListener('mouseup', () => {
                 isDragging = false;
             });
             
-            // Touch support for mobile
-            volumeKnob.addEventListener('touchstart', (e) => {
-                isDragging = true;
-                startY = e.touches[0].clientY;
-                startTop = parseInt(window.getComputedStyle(volumeKnob).top);
-                e.preventDefault();
-            });
-            
-            document.addEventListener('touchmove', (e) => {
-                if (!isDragging) return;
-                
-                const deltaY = e.touches[0].clientY - startY;
-                const trackHeight = volumeTrack.clientHeight - volumeKnob.clientHeight;
-                let newTop = Math.max(0, Math.min(trackHeight, startTop + deltaY));
-                
-                volumeKnob.style.top = newTop + 'px';
-                
-                // Calculate volume based on knob position
-                const volume = 1 - (newTop / trackHeight);
-                this.setVolume(volume);
-            });
-            
-            document.addEventListener('touchend', () => {
-                isDragging = false;
-            });
+            // Initial volume setting
+            updateVolumeFromPosition(25); // Middle position
         }
+        
+        // Add click listeners to other buttons to init audio
+        const buttons = document.querySelectorAll('button, .btn-a, .btn-b, .btn-start, .btn-select, .dpad-up, .dpad-down, .dpad-left, .dpad-right');
+        buttons.forEach(button => {
+            button.addEventListener('mousedown', () => this.initAudioContext());
+            button.addEventListener('touchstart', () => this.initAudioContext());
+        });
+        
+        // Also init on any key press
+        document.addEventListener('keydown', () => this.initAudioContext());
     },
     
     /**
@@ -226,15 +153,11 @@ const AudioManager = {
      */
     setVolume(level) {
         this.volume = Math.max(0, Math.min(1, level));
-        
-        // Set volume on HTML audio elements if they exist
-        Object.values(this.sounds).forEach(sound => {
-            if (sound) sound.volume = this.volume;
-        });
     },
     
     /**
      * Toggle mute state
+     * @returns {boolean} - New mute state
      */
     toggleMute() {
         this.muted = !this.muted;
@@ -245,27 +168,252 @@ const AudioManager = {
      * Play the move sound
      */
     playMoveSound() {
-        if (this.moveSound) this.moveSound();
+        if (!this.initialized) {
+            this.initAudioContext();
+        }
+        
+        if (this.muted || !this.audioContext) return;
+        
+        // Create a quick blip sound
+        try {
+            const oscillator = this.audioContext.createOscillator();
+            const gainNode = this.audioContext.createGain();
+            
+            oscillator.type = 'square';
+            oscillator.frequency.value = 150;
+            
+            gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(this.volume, this.audioContext.currentTime + 0.01);
+            gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.05);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(this.audioContext.destination);
+            
+            oscillator.start();
+            oscillator.stop(this.audioContext.currentTime + 0.05);
+        } catch (e) {
+            console.warn('Error playing move sound:', e);
+        }
     },
 
     /**
      * Play the eat sound
      */
     playEatSound() {
-        if (this.eatSound) this.eatSound();
+        if (!this.initialized) {
+            this.initAudioContext();
+        }
+        
+        if (this.muted || !this.audioContext) return;
+        
+        try {
+            // First tone
+            const osc1 = this.audioContext.createOscillator();
+            const gain1 = this.audioContext.createGain();
+            
+            osc1.type = 'square';
+            osc1.frequency.value = 300;
+            
+            gain1.gain.setValueAtTime(0, this.audioContext.currentTime);
+            gain1.gain.linearRampToValueAtTime(this.volume, this.audioContext.currentTime + 0.01);
+            gain1.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.1);
+            
+            osc1.connect(gain1);
+            gain1.connect(this.audioContext.destination);
+            
+            osc1.start();
+            osc1.stop(this.audioContext.currentTime + 0.1);
+            
+            // Second tone
+            setTimeout(() => {
+                if (!this.audioContext) return;
+                
+                const osc2 = this.audioContext.createOscillator();
+                const gain2 = this.audioContext.createGain();
+                
+                osc2.type = 'square';
+                osc2.frequency.value = 450;
+                
+                gain2.gain.setValueAtTime(0, this.audioContext.currentTime);
+                gain2.gain.linearRampToValueAtTime(this.volume, this.audioContext.currentTime + 0.01);
+                gain2.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.1);
+                
+                osc2.connect(gain2);
+                gain2.connect(this.audioContext.destination);
+                
+                osc2.start();
+                osc2.stop(this.audioContext.currentTime + 0.1);
+            }, 100);
+        } catch (e) {
+            console.warn('Error playing eat sound:', e);
+        }
     },
 
     /**
      * Play the game over sound
      */
     playGameOverSound() {
-        if (this.gameOverSound) this.gameOverSound();
+        if (!this.initialized) {
+            this.initAudioContext();
+        }
+        
+        if (this.muted || !this.audioContext) return;
+        
+        try {
+            // Play a series of descending notes
+            const startFreq = 400;
+            for (let i = 0; i < 4; i++) {
+                setTimeout(() => {
+                    if (!this.audioContext) return;
+                    
+                    const osc = this.audioContext.createOscillator();
+                    const gain = this.audioContext.createGain();
+                    
+                    osc.type = 'square';
+                    osc.frequency.value = startFreq - (i * 50);
+                    
+                    gain.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    gain.gain.linearRampToValueAtTime(this.volume, this.audioContext.currentTime + 0.01);
+                    gain.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.2);
+                    
+                    osc.connect(gain);
+                    gain.connect(this.audioContext.destination);
+                    
+                    osc.start();
+                    osc.stop(this.audioContext.currentTime + 0.2);
+                }, i * 150);
+            }
+        } catch (e) {
+            console.warn('Error playing game over sound:', e);
+        }
     },
 
     /**
      * Play the start sound
      */
     playStartSound() {
-        if (this.startSound) this.startSound();
+        if (!this.initialized) {
+            this.initAudioContext();
+        }
+        
+        if (this.muted || !this.audioContext) return;
+        
+        try {
+            // Create an ascending sequence of notes
+            const freqs = [300, 400, 500, 600];
+            for (let i = 0; i < freqs.length; i++) {
+                setTimeout(() => {
+                    if (!this.audioContext) return;
+                    
+                    const osc = this.audioContext.createOscillator();
+                    const gain = this.audioContext.createGain();
+                    
+                    osc.type = 'square';
+                    osc.frequency.value = freqs[i];
+                    
+                    gain.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    gain.gain.linearRampToValueAtTime(this.volume, this.audioContext.currentTime + 0.01);
+                    gain.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.1);
+                    
+                    osc.connect(gain);
+                    gain.connect(this.audioContext.destination);
+                    
+                    osc.start();
+                    osc.stop(this.audioContext.currentTime + 0.1);
+                }, i * 100);
+            }
+        } catch (e) {
+            console.warn('Error playing start sound:', e);
+        }
+    },
+    
+    /**
+     * Play power-up sound
+     */
+    playPowerUpSound() {
+        if (!this.initialized) {
+            this.initAudioContext();
+        }
+        
+        if (this.muted || !this.audioContext) return;
+        
+        try {
+            // Create a special power-up sound effect
+            const osc1 = this.audioContext.createOscillator();
+            const gain1 = this.audioContext.createGain();
+            
+            osc1.type = 'square';
+            osc1.frequency.value = 600;
+            
+            gain1.gain.setValueAtTime(0, this.audioContext.currentTime);
+            gain1.gain.linearRampToValueAtTime(this.volume, this.audioContext.currentTime + 0.01);
+            gain1.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.1);
+            
+            osc1.connect(gain1);
+            gain1.connect(this.audioContext.destination);
+            
+            osc1.start();
+            osc1.stop(this.audioContext.currentTime + 0.1);
+            
+            setTimeout(() => {
+                if (!this.audioContext) return;
+                
+                const osc2 = this.audioContext.createOscillator();
+                const gain2 = this.audioContext.createGain();
+                
+                osc2.type = 'square';
+                osc2.frequency.value = 800;
+                
+                gain2.gain.setValueAtTime(0, this.audioContext.currentTime);
+                gain2.gain.linearRampToValueAtTime(this.volume, this.audioContext.currentTime + 0.01);
+                gain2.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.1);
+                
+                osc2.connect(gain2);
+                gain2.connect(this.audioContext.destination);
+                
+                osc2.start();
+                osc2.stop(this.audioContext.currentTime + 0.1);
+            }, 100);
+        } catch (e) {
+            console.warn('Error playing power-up sound:', e);
+        }
+    },
+    
+    /**
+     * Play level up sound
+     */
+    playLevelUpSound() {
+        if (!this.initialized) {
+            this.initAudioContext();
+        }
+        
+        if (this.muted || !this.audioContext) return;
+        
+        try {
+            const freqs = [400, 500, 600, 700, 800];
+            for (let i = 0; i < freqs.length; i++) {
+                setTimeout(() => {
+                    if (!this.audioContext) return;
+                    
+                    const osc = this.audioContext.createOscillator();
+                    const gain = this.audioContext.createGain();
+                    
+                    osc.type = 'square';
+                    osc.frequency.value = freqs[i];
+                    
+                    gain.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    gain.gain.linearRampToValueAtTime(this.volume, this.audioContext.currentTime + 0.01);
+                    gain.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.1);
+                    
+                    osc.connect(gain);
+                    gain.connect(this.audioContext.destination);
+                    
+                    osc.start();
+                    osc.stop(this.audioContext.currentTime + 0.1);
+                }, i * 80);
+            }
+        } catch (e) {
+            console.warn('Error playing level up sound:', e);
+        }
     }
 };

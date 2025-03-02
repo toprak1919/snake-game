@@ -21,6 +21,7 @@
             </div>
             
             <div class="screen">
+                <div class="screen-overlay"></div>
                 <canvas id="game-canvas" width="400" height="360"></canvas>
             </div>
             
@@ -46,24 +47,36 @@
             </div>
             
             <div class="menu-buttons">
-                <div class="btn-select" id="reset-button">
+                <div class="btn-select" id="select-button">
                     <span>SELECT</span>
                 </div>
                 <div class="btn-start" id="start-button">
                     <span>START</span>
                 </div>
             </div>
+            
+            <!-- Volume slider -->
+            <div class="volume-slider">
+                <div class="volume-track"></div>
+                <div class="volume-knob" id="volume-knob"></div>
+            </div>
+            
+            <!-- Battery indicator -->
+            <div class="battery-indicator">BATT.</div>
         </div>
     </div>
 
     <!-- Load modules in the correct order -->
     <script src="js/config.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/audio.js"></script>
     <script src="js/input.js"></script>
     <script src="js/food.js"></script>
+    <script src="js/powerUp.js"></script>
     <script src="js/snake.js"></script>
     <script src="js/renderer.js"></script>
     <script src="js/scoreManager.js"></script>
+    <script src="js/levelManager.js"></script>
     <script src="js/game.js"></script>
 </body>
 </html>
