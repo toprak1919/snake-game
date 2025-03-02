@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Boy</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="gameboy">
+        <div class="gameboy-header">
+            <div class="title">SNAKE BOY</div>
+            <div class="brand">NINTENDO</div>
+        </div>
+        
+        <div class="screen-container">
+            <div class="power-indicator">
+                <span>POWER</span>
+                <span class="led"></span>
+            </div>
+            
+            <div class="screen">
+                <canvas id="game-canvas" width="400" height="360"></canvas>
+            </div>
+            
+            <div class="gameboy-label">Game Boy</div>
+        </div>
+        
+        <div class="controls-container">
+            <div class="dpad">
+                <div class="dpad-up" id="dpad-up"></div>
+                <div class="dpad-right" id="dpad-right"></div>
+                <div class="dpad-down" id="dpad-down"></div>
+                <div class="dpad-left" id="dpad-left"></div>
+                <div class="dpad-center"></div>
+            </div>
+            
+            <div class="action-buttons">
+                <div class="btn-b" id="b-button">
+                    <span>B</span>
+                </div>
+                <div class="btn-a" id="a-button">
+                    <span>A</span>
+                </div>
+            </div>
+            
+            <div class="menu-buttons">
+                <div class="btn-select" id="reset-button">
+                    <span>SELECT</span>
+                </div>
+                <div class="btn-start" id="start-button">
+                    <span>START</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load modules in the correct order -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/input.js"></script>
+    <script src="js/food.js"></script>
+    <script src="js/snake.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/scoreManager.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>

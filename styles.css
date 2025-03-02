@@ -1,0 +1,231 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Press Start 2P', cursive;
+    background-color: #303030;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: #333;
+}
+
+.gameboy {
+    background-color: #c5cfa3; /* Game Boy light green color */
+    width: 420px;
+    padding: 20px;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
+    border-radius: 10px 10px 60px 10px;
+}
+
+.gameboy-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    color: #e8ecdb;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.title {
+    font-size: 16px;
+    letter-spacing: 1px;
+}
+
+.brand {
+    font-size: 16px;
+    letter-spacing: 1px;
+}
+
+.screen-container {
+    background-color: #2a2a2a;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.power-indicator {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 8px;
+    color: #c5cfa3;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.led {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background-color: #ff0000;
+    border-radius: 50%;
+}
+
+.screen {
+    background-color: #9cb53b; /* Game Boy screen green */
+    height: 360px;
+    overflow: hidden;
+    position: relative;
+    border: 4px solid white;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Screen scan lines effect */
+.screen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        transparent 0px,
+        rgba(0, 0, 0, 0.03) 2px,
+        transparent 4px
+    );
+    z-index: 2;
+    pointer-events: none;
+}
+
+#game-canvas {
+    background-color: #9cb53b; /* Same as screen background */
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+    position: relative;
+    z-index: 1;
+}
+
+.gameboy-label {
+    text-align: center;
+    font-size: 13px;
+    margin-top: 10px;
+    color: #ddd;
+    font-weight: bold;
+    transform: skew(-10deg);
+    font-style: italic;
+}
+
+.controls-container {
+    position: relative;
+    height: 200px;
+    margin-bottom: 30px;
+}
+
+/* D-pad styling */
+.dpad {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 100px;
+    height: 100px;
+}
+
+.dpad-center {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-color: #333;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.dpad-up, .dpad-right, .dpad-down, .dpad-left {
+    position: absolute;
+    background-color: #333;
+    cursor: pointer;
+}
+
+.dpad-up {
+    top: 0;
+    left: 35px;
+    width: 30px;
+    height: 35px;
+    border-radius: 5px 5px 0 0;
+}
+
+.dpad-right {
+    top: 35px;
+    left: 65px;
+    width: 35px;
+    height: 30px;
+    border-radius: 0 5px 5px 0;
+}
+
+.dpad-down {
+    top: 65px;
+    left: 35px;
+    width: 30px;
+    height: 35px;
+    border-radius: 0 0 5px 5px;
+}
+
+.dpad-left {
+    top: 35px;
+    left: 0;
+    width: 35px;
+    height: 30px;
+    border-radius: 5px 0 0 5px;
+}
+
+/* Action buttons styling */
+.action-buttons {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    display: flex;
+    gap: 20px;
+}
+
+.btn-a, .btn-b {
+    width: 50px;
+    height: 50px;
+    background-color: #333;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.btn-a span, .btn-b span {
+    transform: translateY(-2px);
+}
+
+/* Start/Select buttons styling */
+.menu-buttons {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 30px;
+}
+
+.btn-select, .btn-start {
+    background-color: #333;
+    border-radius: 20px;
+    padding: 8px 15px;
+    color: white;
+    font-size: 10px;
+    cursor: pointer;
+    text-align: center;
+    transform: rotate(-25deg);
+}
+
+/* Active state for buttons */
+.dpad-up:active, .dpad-right:active, .dpad-down:active, .dpad-left:active,
+.btn-a:active, .btn-b:active, .btn-select:active, .btn-start:active {
+    opacity: 0.8;
+    transform: scale(0.95);
+}
